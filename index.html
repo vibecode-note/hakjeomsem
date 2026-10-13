@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>학점셈 · 기말 몇 점 받아야 해?</title>
+<meta name="description" content="과목별 학점·성적만 넣으면 평점이 바로 나오고, 목표 학점까지 기말에 몇 점 받아야 하는지 알려줘요. P/F·재수강·4.3 만점도 돼요.">
+<meta name="theme-color" content="#E6F4FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="학점셈">
+<meta property="og:title" content="학점셈 · 기말 몇 점 받아야 해?">
+<meta property="og:description" content="목표 학점까지 기말에 몇 점 필요한지 바로 계산 🎓">
+<meta property="og:url" content="https://vibecode-note.github.io/hakjeomsem/">
+<meta property="og:image" content="https://vibecode-note.github.io/hakjeomsem/icons/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root {
+  --ink: #172033; --sub: #5E6A80; --faint: #A3ADBE; --card: #FFFFFF; --field: #F1F5FB; --line: #E4EAF3;
+  --blue: #2F6BFF; --teal: #12B8A6; --tint: #EAF2FF; --sun: #FFD43B; --bad: #E5484D; --ok: #0E9F6E;
+  --round: 'Jua', 'Pretendard Variable', sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: #EAF4FF; }
+body {
+  margin: 0; min-height: 100dvh; color: var(--ink); letter-spacing: -0.015em; font-feature-settings: 'tnum';
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif;
+  background: radial-gradient(110% 55% at 0% 0%, #DCEBFF 0%, transparent 60%), radial-gradient(90% 50% at 100% 25%, #D8F7F1 0%, transparent 60%), radial-gradient(80% 45% at 10% 95%, #FFF3C9 0%, transparent 60%), #F4F8FF;
+  background-attachment: fixed;
+}
+.app { max-width: 440px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 40px); }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+button, select, input { font: inherit; color: inherit; }
+
+.top { display: flex; align-items: center; gap: 10px; padding: 4px 6px 16px; }
+.top h1 { margin: 0; font-family: var(--round); font-weight: 400; font-size: 28px; }
+.tag { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--blue); background: #fff; padding: 6px 11px; border-radius: 999px; box-shadow: 0 2px 8px rgba(47,107,255,.12); }
+
+/* 평점 카드 */
+.hero { position: relative; border-radius: 28px; padding: 22px 22px 20px; color: #fff; background: linear-gradient(135deg, #2F6BFF 0%, #3F8CFF 45%, #12B8A6 100%); box-shadow: 0 16px 36px rgba(47,107,255,.3); overflow: hidden; }
+.hero::before { content: ''; position: absolute; width: 220px; height: 220px; right: -80px; bottom: -120px; border-radius: 50%; background: rgba(255,255,255,.12); }
+.label { font-size: 15px; font-weight: 600; opacity: .9; }
+.gpa { font-family: var(--round); font-size: 58px; line-height: 1.05; margin: 6px 0 4px; }
+.gpa small { font-size: 24px; opacity: .8; margin-left: 4px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.2); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
+.sticker { position: absolute; top: 14px; right: 16px; font-size: 56px; transform: rotate(10deg); filter: drop-shadow(0 6px 10px rgba(0,0,0,.18)); }
+.sticker.pop { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { 0% { transform: rotate(10deg) scale(.6); } 100% { transform: rotate(10deg) scale(1); } }
+.bar { height: 8px; border-radius: 6px; background: rgba(255,255,255,.25); margin-top: 16px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--sun); border-radius: 6px; transition: width .4s ease; }
+.pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; position: relative; }
+.pill { background: rgba(255,255,255,.16); border-radius: 14px; padding: 9px 6px; text-align: center; }
+.pill span { display: block; font-size: 12px; opacity: .85; }
+.pill b { font-size: 16px; font-weight: 800; }
+
+.seg { display: flex; gap: 6px; background: #fff; border-radius: 16px; padding: 5px; margin-top: 14px; box-shadow: 0 4px 14px rgba(40,70,140,.06); }
+.seg button { flex: 1; height: 40px; border: 0; border-radius: 12px; background: none; color: var(--sub); font-weight: 700; cursor: pointer; }
+.seg button[aria-pressed=true] { background: var(--ink); color: #fff; }
+
+/* 카드 공통 */
+.box { background: var(--card); border-radius: 26px; padding: 18px 16px; margin-top: 16px; box-shadow: 0 6px 20px rgba(40,70,140,.07); }
+.box h2 { margin: 0 2px 4px; font-size: 17px; font-weight: 800; }
+.box p.sub { margin: 0 2px 12px; font-size: 13px; color: var(--sub); }
+
+/* 과목 */
+.subj { position: relative; border-radius: 20px; background: var(--field); padding: 12px 12px 10px; margin-top: 10px; border: 2px solid transparent; transition: border-color .2s, background .2s; }
+.subj.pending { background: #FFF8DB; border-color: #FFE38A; }
+.row1 { display: flex; gap: 10px; align-items: center; }
+.grade-big { width: 52px; height: 52px; flex: none; border-radius: 16px; display: grid; place-items: center; font-family: var(--round); font-size: 24px; color: #fff; background: var(--c, #C9D3E3); box-shadow: 0 6px 14px color-mix(in srgb, var(--c, #C9D3E3) 40%, transparent); transform: rotate(-4deg); }
+.row1 .nm { flex: 1; min-width: 0; }
+.row1 input { width: 100%; border: 0; background: none; padding: 2px 0; font-size: 16px; font-weight: 800; color: var(--ink); }
+.row1 input::placeholder { color: var(--faint); }
+.cr { display: flex; gap: 4px; margin-top: 4px; }
+.cr button { border: 0; background: #fff; color: var(--sub); font-size: 12px; font-weight: 800; padding: 5px 9px; border-radius: 999px; cursor: pointer; }
+.cr button { min-width: 34px; }
+.cr button[aria-pressed=true] { background: var(--ink); color: #fff; }
+.cr .unit { align-self: center; font-size: 12px; color: var(--sub); font-weight: 600; margin-left: 2px; }
+.x { position: absolute; top: 8px; right: 8px; border: 0; background: none; color: var(--faint); font-size: 16px; cursor: pointer; padding: 6px; }
+.grades { display: flex; gap: 6px; overflow-x: auto; margin: 10px -12px 0; padding: 2px 12px 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.grades::-webkit-scrollbar { display: none; }
+.grades button { flex: none; min-width: 46px; height: 40px; border: 0; border-radius: 12px; background: #fff; color: var(--ink); font-family: var(--round); font-size: 17px; cursor: pointer; scroll-snap-align: start; }
+.grades button[aria-pressed=true] { background: var(--c); color: #fff; box-shadow: 0 4px 10px color-mix(in srgb, var(--c) 45%, transparent); }
+select { border: 0; background: #fff; border-radius: 12px; padding: 11px 10px; font-size: 15px; font-weight: 700; width: 100%; }
+.chips { display: flex; gap: 6px; margin-top: 8px; align-items: center; flex-wrap: wrap; }
+.chip { border: 0; background: #fff; color: var(--sub); font-size: 13px; font-weight: 700; padding: 7px 11px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed=true] { background: var(--blue); color: #fff; }
+.chips select { width: auto; padding: 6px 8px; font-size: 13px; }
+.chips small { font-size: 12px; color: var(--sub); }
+.share { width: 100%; margin-top: 10px; height: 50px; border: 0; border-radius: 16px; background: var(--ink); color: #fff; font-weight: 800; font-size: 15px; cursor: pointer; }
+.answer.win { background: linear-gradient(135deg, #E3F8EF, #FFF6CC); }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 24px); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.on { opacity: 1; }
+.add { width: 100%; margin-top: 10px; height: 48px; border: 2px dashed #BFD2F5; background: none; border-radius: 16px; color: var(--blue); font-weight: 800; cursor: pointer; }
+
+/* 목표 */
+.goal { display: flex; align-items: center; gap: 10px; }
+.goal input { width: 110px; border: 0; background: var(--field); border-radius: 14px; padding: 13px 14px; font-size: 20px; font-weight: 800; text-align: center; }
+.goal span { color: var(--sub); font-weight: 600; }
+.answer { margin-top: 12px; border-radius: 16px; padding: 14px 16px; font-size: 15px; line-height: 1.55; font-weight: 600; background: var(--tint); }
+.answer b.big { font-family: var(--round); font-size: 30px; font-weight: 400; color: var(--blue); margin: 0 2px; }
+.answer.done { background: #E3F8EF; } .answer.bad { background: #FFE9EA; }
+.slot-btn { width: 100%; margin-top: 12px; height: 56px; border: 0; border-radius: 18px; color: #fff; font-family: var(--round); font-size: 19px; cursor: pointer; background: linear-gradient(135deg, #2F6BFF, #12B8A6); box-shadow: 0 10px 22px rgba(47,107,255,.3); }
+.slot-btn:disabled { opacity: .5; }
+.reels { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+.reel { width: 64px; height: 72px; border-radius: 14px; background: var(--ink); color: var(--sun); display: grid; place-items: center; font-family: var(--round); font-size: 28px; box-shadow: inset 0 -6px 0 rgba(255,255,255,.08); }
+.reel small { display: block; font-family: 'Pretendard Variable'; font-size: 10px; color: #9FB0CC; margin-top: -8px; }
+.slot-out { text-align: center; margin-top: 10px; font-size: 15px; font-weight: 700; min-height: 22px; }
+
+details { margin-top: 16px; background: #fff; border-radius: 22px; box-shadow: 0 6px 20px rgba(40,70,140,.07); }
+summary { padding: 16px 18px; font-weight: 800; cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; color: var(--faint); font-size: 20px; line-height: 1; }
+details[open] summary::after { content: '−'; }
+.fold { padding: 0 16px 18px; display: grid; gap: 8px; }
+.fold .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fold input { border: 0; background: var(--field); border-radius: 12px; padding: 12px; font-size: 15px; width: 100%; }
+.fold label { font-size: 13px; color: var(--sub); font-weight: 600; }
+.foot { font-size: 12px; color: var(--sub); line-height: 1.6; text-align: center; padding: 18px 10px 0; }
+.btn:active, .chip:active, .slot-btn:active, .add:active { transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top"><h1>학점셈 🎓</h1><span class="tag">기말 몇 점 받아야 해?</span></header>
+
+  <section class="hero" aria-live="polite">
+    <div class="sticker" id="sticker" aria-hidden="true">📚</div>
+    <div class="label">이번 학기 평점</div>
+    <div class="gpa"><span id="gpa">-</span><small id="max">/ 4.5</small></div>
+    <span class="badge" id="badge"></span>
+    <div class="bar" aria-hidden="true"><i id="bar" style="width:0"></i></div>
+    <div class="pills">
+      <div class="pill"><span>취득 학점</span><b id="earned">0</b></div>
+      <div class="pill"><span>미정 과목</span><b id="pending">0</b></div>
+      <div class="pill"><span>누적 평점</span><b id="cum">-</b></div>
+    </div>
+  </section>
+
+  <div class="seg" role="group" aria-label="만점 기준">
+    <button data-scale="4.5" aria-pressed="true">4.5 만점</button>
+    <button data-scale="4.3" aria-pressed="false">4.3 만점</button>
+  </div>
+
+  <section class="box">
+    <h2>📝 이번 학기 과목</h2>
+    <p class="sub">아직 성적 안 나온 과목은 '미정'으로 두세요</p>
+    <div id="list"></div>
+    <button class="add" id="add">+ 과목 추가</button>
+  </section>
+
+  <section class="box">
+    <h2>🎯 목표 학점</h2>
+    <p class="sub">미정 과목에서 최소 몇 점 받아야 하는지 알려줘요</p>
+    <div class="goal"><input id="goal" inputmode="decimal" placeholder="3.5" aria-label="목표 평점"><span>점 넘기고 싶어</span></div>
+    <div class="answer" id="answer"></div>
+    <button class="slot-btn" id="spin">🎰 기말 성적 돌려보기</button>
+    <div class="reels" id="reels" aria-hidden="true"></div>
+    <div class="slot-out" id="slotOut" aria-live="polite"></div>
+    <button class="share" id="share">📤 친구한테 내 학점 자랑하기</button>
+  </section>
+  <div class="toast" id="toast" role="status"></div>
+
+  <details>
+    <summary>📊 누적 평점 · 재수강 설정</summary>
+    <div class="fold">
+      <div class="two">
+        <div><label for="prevGpa">지난 학기까지 평점</label><input id="prevGpa" inputmode="decimal" placeholder="예) 3.2"></div>
+        <div><label for="prevCr">평점 들어간 학점</label><input id="prevCr" inputmode="numeric" placeholder="예) 48"></div>
+      </div>
+      <label for="cap">재수강 성적 상한 (학교 규정 확인)</label>
+      <select id="cap"><option value="">상한 없음</option><option value="A0">A0까지</option><option value="B+">B+까지</option></select>
+      <p class="sub" style="margin:0">재수강 과목에서 '이전 성적'을 고르면 누적 평점에서 예전 성적을 빼고 계산해요.</p>
+    </div>
+  </details>
+
+  <p class="foot">학점 · 재수강 · 학사경고 기준은 학교마다 달라요. 정확한 건 학교 학사 규정을 확인해 주세요. 입력한 내용은 이 폰에만 저장돼요.</p>
+</main>
+
+<script type="module">
+import { SCALES, CREDITS, semester, target, cumulative, fmt, title } from './grades.js';
+
+const KEY = 'hakjeomsem-v1';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const blank = () => ({ name: '', credits: 3, grade: '', retake: false, prev: '' });
+let st;
+try { st = JSON.parse(localStorage.getItem(KEY)); } catch {}
+if (!st || !Array.isArray(st.subjects)) st = { scale: '4.5', cap: '', goal: '', prevGpa: '', prevCr: '', subjects: [blank(), blank(), blank()] };
+let lastFace = null;
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} }
+const letters = () => SCALES[st.scale].map(([l]) => l);
+
+// 등급 색: A 파랑 · B 청록 · C 주황 · D/F 빨강 · P 보라 · 미정 노랑
+const gColor = (g) => (g === '' ? '#F2B705' : g === 'P' ? '#8B7CF6' : g === 'NP' ? '#8A94A6' : { A: '#2F6BFF', B: '#12B8A6', C: '#F08A24', D: '#E5484D', F: '#C9303A' }[g[0]]);
+function renderList() {
+  const choices = [['', '미정'], ...letters().map((l) => [l, l]), ['P', 'P'], ['NP', 'NP']];
+  $('list').innerHTML = st.subjects.map((s, k) => `
+    <div class="subj ${s.grade === '' ? 'pending' : ''}">
+      <button class="x" data-del="${k}" aria-label="과목 ${k + 1} 지우기">✕</button>
+      <div class="row1">
+        <div class="grade-big" style="--c:${gColor(s.grade)}" aria-hidden="true">${s.grade === '' ? '⏳' : esc(s.grade)}</div>
+        <div class="nm">
+          <input data-k="${k}" data-f="name" value="${esc(s.name)}" placeholder="과목 ${k + 1} 이름" aria-label="과목 ${k + 1} 이름">
+          <div class="cr" role="group" aria-label="학점">${CREDITS.map((c) => `<button data-k="${k}" data-f="credits" data-v="${c}" aria-pressed="${c === +s.credits}" aria-label="${c}학점">${c}</button>`).join('')}<span class="unit">학점</span></div>
+        </div>
+      </div>
+      <div class="grades" role="group" aria-label="성적">${choices.map(([v, t]) => `<button data-k="${k}" data-f="grade" data-v="${v}" style="--c:${gColor(v)}" aria-pressed="${v === s.grade}">${t}</button>`).join('')}</div>
+      <div class="chips">
+        <button class="chip" data-k="${k}" data-retake aria-pressed="${!!s.retake}">🔁 재수강</button>
+        ${s.retake ? `<small>이전 성적</small><select data-k="${k}" data-f="prev" aria-label="재수강 전 성적"><option value="">선택</option>${letters().map((l) => `<option ${l === s.prev ? 'selected' : ''}>${l}</option>`).join('')}</select>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function renderTop() {
+  const r = semester(st.subjects, st.scale, st.cap);
+  const t = title(r.gpa, st.scale);
+  $('gpa').textContent = fmt(r.gpa);
+  $('max').textContent = '/ ' + st.scale;
+  $('badge').textContent = t.emoji + ' ' + t.text;
+  if (t.emoji !== lastFace) { const s = $('sticker'); s.textContent = t.emoji; s.classList.remove('pop'); void s.offsetWidth; s.classList.add('pop'); lastFace = t.emoji; }
+  $('bar').style.width = r.gpa == null ? '0' : `${(r.gpa / +st.scale) * 100}%`;
+  $('earned').textContent = r.earned;
+  $('pending').textContent = st.subjects.filter((s) => s.grade === '').length + '개';
+  $('cum').textContent = fmt(cumulative(st.subjects, +st.prevGpa, +st.prevCr, st.scale, st.cap));
+
+  const a = $('answer'), g = +st.goal, tg = target(st.subjects, g, st.scale, st.cap);
+  a.className = 'answer';
+  if (!(g > 0)) a.innerHTML = '목표 평점을 넣어 보세요. 예) 3.5';
+  else if (tg.state === 'none') a.innerHTML = "성적이 '미정'인 과목이 있어야 계산할 수 있어요.";
+  else if (tg.state === 'done') { a.className += ' win'; a.innerHTML = '🎉 이미 목표 달성! 미정 과목에서 F만 피하면 돼요.'; }
+  else if (tg.state === 'impossible') { a.className += ' bad'; a.innerHTML = `😭 미정 과목을 전부 A+ 받아도 ${g}는 어려워요. 목표를 조금 낮춰 볼까요?`; }
+  else a.innerHTML = `미정 ${r.pending}학점에서 평균 <b class="big">${tg.letter}</b> 이상!<br><small>(평균 ${fmt(tg.need)}점 필요 · ${tg.letter} 받으면 평점 ${fmt(tg.result)})</small>`;
+  $('spin').disabled = !r.pending;
+}
+
+function render() { renderList(); renderTop(); save(); }
+
+$('list').addEventListener('input', (e) => { const k = e.target.dataset.k; if (k != null && e.target.dataset.f === 'name') { st.subjects[k].name = e.target.value; save(); } });
+$('list').addEventListener('change', (e) => {
+  const { k, f } = e.target.dataset; if (k == null || f === 'name') return;
+  st.subjects[k][f] = f === 'credits' ? +e.target.value : e.target.value;
+  render();
+});
+$('list').addEventListener('click', (e) => {
+  const v = e.target.closest('button[data-v]');
+  if (v) {
+    const { k, f } = v.dataset, keep = $('list').querySelectorAll('.grades')[k]?.scrollLeft;
+    st.subjects[k][f] = f === 'credits' ? +v.dataset.v : v.dataset.v;
+    render();
+    const g = $('list').querySelectorAll('.grades')[k]; if (g && keep != null) g.scrollLeft = keep; // 칩 스크롤 위치 유지
+    return;
+  }
+  const d = e.target.closest('[data-del]'), r = e.target.closest('[data-retake]');
+  if (d) { st.subjects.splice(+d.dataset.del, 1); render(); }
+  if (r) { const s = st.subjects[r.dataset.k]; s.retake = !s.retake; render(); }
+});
+$('add').onclick = () => { st.subjects.push(blank()); render(); };
+document.querySelector('.seg').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-scale]'); if (!b) return;
+  st.scale = b.dataset.scale;
+  document.querySelectorAll('.seg button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  // 만점이 바뀌면 그 기준에 없는 성적(A- 등)은 미정으로
+  st.subjects.forEach((s) => { if (s.grade && !['P', 'NP'].includes(s.grade) && !letters().includes(s.grade)) s.grade = ''; if (s.prev && !letters().includes(s.prev)) s.prev = ''; });
+  render();
+});
+for (const id of ['goal', 'prevGpa', 'prevCr']) $(id).addEventListener('input', (e) => { st[id] = e.target.value; renderTop(); save(); });
+$('cap').addEventListener('change', (e) => { st.cap = e.target.value; renderTop(); save(); });
+
+// 🎰 기말 슬롯: 미정 과목에 성적을 굴려 보는 미리보기 (저장은 안 함)
+$('spin').onclick = () => {
+  const pend = st.subjects.map((s, k) => ({ s, k })).filter(({ s }) => s.grade === '');
+  if (!pend.length) return;
+  const pool = letters().slice(0, -1); // F는 빼고 굴림
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const final = pend.map(() => pool[Math.floor(Math.random() * pool.length)]);
+  const draw = (ls) => { $('reels').innerHTML = ls.map((l, i) => `<div class="reel"><div>${l}<small>${esc(pend[i].s.name || `과목 ${pend[i].k + 1}`)}</small></div></div>`).join(''); };
+  $('spin').disabled = true; $('slotOut').textContent = '';
+  let n = still ? 0 : 14;
+  const tick = () => {
+    if (n-- > 0) { draw(final.map(() => pool[Math.floor(Math.random() * pool.length)])); return setTimeout(tick, 70); }
+    draw(final);
+    const sim = st.subjects.map((s) => s.grade === '' ? { ...s, grade: final[pend.findIndex((p) => p.s === s)] } : s);
+    const g = semester(sim, st.scale, st.cap).gpa, t = title(g, st.scale);
+    const win = +st.goal > 0 && g >= +st.goal - 1e-9;
+    $('slotOut').innerHTML = `이렇게 나오면 평점 <b>${fmt(g)}</b> ${t.emoji} ${esc(t.text)}${win ? '<br>목표 달성 🎉' : +st.goal > 0 ? '<br>목표까지 조금 더 💪' : ''}`;
+    $('spin').disabled = false;
+  };
+  tick();
+};
+
+// 공유: 폰 공유창, 안 되면 클립보드
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); setTimeout(() => el.classList.remove('on'), 2200); }
+$('share').onclick = async () => {
+  const r = semester(st.subjects, st.scale, st.cap), tg = target(st.subjects, +st.goal, st.scale, st.cap), t = title(r.gpa, st.scale);
+  const line = tg.state === 'need' ? `목표 ${st.goal} 가려면 기말 ${tg.letter} 각 🎯` : tg.state === 'done' ? '목표 이미 달성 🎉' : '';
+  const text = `이번 학기 내 학점 ${fmt(r.gpa)} ${t.emoji} ${t.text}\n${line}\n학점셈으로 계산함 👉`;
+  const url = location.href.split('#')[0].split('?')[0];
+  try { if (navigator.share) { await navigator.share({ title: '학점셈', text, url }); return; } } catch (e) { if (e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(`${text} ${url}`); toast('복사했어요! 카톡에 붙여넣기 💬'); } catch { toast('공유가 안 되는 브라우저예요'); }
+};
+
+$('goal').value = st.goal; $('prevGpa').value = st.prevGpa; $('prevCr').value = st.prevCr; $('cap').value = st.cap;
+document.querySelectorAll('.seg button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.scale === st.scale));
+render();
+// 처음 열 때 고른 성적 칩이 보이게
+$('list').querySelectorAll('.grades').forEach((g) => { const on = g.querySelector('[aria-pressed=true]'); if (on) g.scrollLeft = Math.max(0, on.offsetLeft - g.clientWidth / 2); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
