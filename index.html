@@ -111,7 +111,8 @@ select { border: 0; background: #fff; border-radius: 12px; padding: 11px 10px; f
 .reels { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
 .reel { width: 64px; height: 72px; border-radius: 14px; background: var(--ink); color: var(--sun); display: grid; place-items: center; font-family: var(--round); font-size: 28px; box-shadow: inset 0 -6px 0 rgba(255,255,255,.08); }
 .reel small { display: block; font-family: 'Pretendard Variable'; font-size: 10px; color: #9FB0CC; margin-top: -8px; }
-.slot-out { text-align: center; margin-top: 10px; font-size: 15px; font-weight: 700; min-height: 22px; }
+.slot-out { text-align: center; margin-top: 10px; font-size: 15px; font-weight: 700; line-height: 1.5; }
+.reels:empty, .slot-out:empty { display: none; }
 
 details { margin-top: 16px; background: #fff; border-radius: 22px; box-shadow: 0 6px 20px rgba(40,70,140,.07); }
 summary { padding: 16px 18px; font-weight: 800; cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
